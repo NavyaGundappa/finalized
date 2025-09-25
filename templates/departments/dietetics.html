@@ -3,13 +3,50 @@
 {% block title %}{{ department.name }} - Aarogya Hastha{% endblock %}
 
 {% block content %}
+<style>
+    .breadcrumb-section {
+        padding: 10px 0;
+        background-color: #f8f9fa;
+    }
+
+    .breadcrumb {
+        margin-bottom: 0;
+        padding: 0.75rem 1rem;
+    }
+
+    .breadcrumb-item+.breadcrumb-item::before {
+        content: ">>";
+        padding: 0 0.5rem;
+    }
+
+    .breadcrumb-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+</style>
+<section class="breadcrumb-section">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/departments/">Departments</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ department.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</section>
 <section class="department-banner" data-aos="fade-up" data-aos-offset="300" data-aos-easing="ease-in-sine">
     <div class="container">
         <div class="banner">
             {% if department.banner_path %}
-                <img loading="lazy" src="{{ url_for('static', filename=department.banner_path) }}" alt="{{ department.name }}">
+            <img loading="lazy" src="{{ url_for('static', filename=department.banner_path) }}"
+                alt="{{ department.name }}">
             {% else %}
-                <img loading="lazy" src="/static/img/banners/default.jpg" alt="{{ department.name }}">
+            <img loading="lazy" src="/static/img/banners/default.jpg" alt="{{ department.name }}">
             {% endif %}
             <div class="text-box-1">
                 <h1>{{ department.name }}</h1>
@@ -18,19 +55,25 @@
         </div>
     </div>
 </section>
-
+<!-- Overview -->
 <div class="container my-5">
- <ul class="nav nav-tabs" id="departmentTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-bold text-dark" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane" aria-selected="true">Overview</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold text-dark" id="services-tab" data-bs-toggle="tab" data-bs-target="#services-tab-pane" type="button" role="tab" aria-controls="services-tab-pane" aria-selected="false">Our Services</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold text-dark" id="specialists-tab" data-bs-toggle="tab" data-bs-target="#specialists-tab-pane" type="button" role="tab" aria-controls="specialists-tab-pane" aria-selected="false">Our Specialists</button>
-    </li>
-</ul>
+    <ul class="nav nav-tabs" id="departmentTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold text-dark" id="overview-tab" data-bs-toggle="tab"
+                data-bs-target="#overview-tab-pane" type="button" role="tab" aria-controls="overview-tab-pane"
+                aria-selected="true">Overview</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="services-tab" data-bs-toggle="tab"
+                data-bs-target="#services-tab-pane" type="button" role="tab" aria-controls="services-tab-pane"
+                aria-selected="false">Our Services</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-dark" id="specialists-tab" data-bs-toggle="tab"
+                data-bs-target="#specialists-tab-pane" type="button" role="tab" aria-controls="specialists-tab-pane"
+                aria-selected="false">Our Specialists</button>
+        </li>
+    </ul>
 
     <div class="tab-content" id="departmentTabsContent">
 
@@ -45,115 +88,301 @@
                 {% endif %}
             </section>
         </div>
-        
-
-<div class="tab-pane fade" id="services-tab-pane" role="tabpanel" aria-labelledby="services-tab">
-    <section class="department-section py-4">
-        <h2>Types of {{ department.name }} Care</h2>
-        <div class="row g-4">
-            {% for service in services %}
-            <div class="col-md-6">
-                <div class="card h-100 p-3">
-                    {% if service.icon_path %}
-                    <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}" class="card-img-top" style="max-width: 60px;">
-                    {% endif %}
-                    <div class="card-body">
-                        <h4 class="card-title text-dark-blue">{{ service.title }}</h4>
-                        {% if service.list_items %}
-                        <ul class="card-text list-unstyled">
-                            {% for item in service.get_list_items() %}
-                            <li><i class="fas fa-check-circle text-success me-2"></i>{{ item }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                        <p class="card-text">{{ service.description }}</p>
+        <div class="tab-pane fade" id="services-tab-pane" role="tabpanel" aria-labelledby="services-tab">
+            <section class="department-section py-4">
+                <h2>Types of {{ department.name }} Care</h2>
+                <div class="row g-4">
+                    {% for service in services %}
+                    <div class="col-md-6">
+                        <div class="card h-100 p-3">
+                            {% if service.icon_path %}
+                            <img src="{{ url_for('static', filename=service.icon_path) }}" alt="{{ service.title }}"
+                                class="card-img-top" style="max-width: 60px;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h4 class="card-title text-dark-blue">{{ service.title }}</h4>
+                                {% if service.list_items %}
+                                <ul class="card-text list-unstyled">
+                                    {% for item in service.get_list_items() %}
+                                    <li><i class="fas fa-check-circle text-success me-2"></i>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                <p class="card-text">{{ service.description }}</p>
+                            </div>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
+            </section>
         </div>
-    </section>
-</div>
 
-<div class="tab-pane fade" id="specialists-tab-pane" role="tabpanel" aria-labelledby="specialists-tab">
-    <section class="py-4">
-        <div id="specialists-list" class="appointment-section">
-            <div class="row g-3">
-                {% set ns = namespace(has_doctors=False) %}
-                
-                {% for doctor in doctors %}
-                    {% if doctor.is_active %}
+        <div class="tab-pane fade" id="specialists-tab-pane" role="tabpanel" aria-labelledby="specialists-tab">
+            <section class="py-4">
+                <div id="specialists-list" class="appointment-section">
+                    <div class="row g-3">
+                        {% set ns = namespace(has_doctors=False) %}
+
+                        {% for doctor in doctors %}
+                        {% if doctor.is_active %}
                         {% set ns.has_doctors = True %}
                         <div class="col-lg-6 specialist-item" data-specialist="{{ doctor.slug }}">
                             <div class="specialist-card">
                                 <div class="img-box">
                                     {% if doctor.image_path %}
-                                        <img class="img-fluid" src="{{ url_for('static', filename=doctor.image_path) }}" alt="{{ doctor.name }}">
+                                    <img class="img-fluid" src="{{ url_for('static', filename=doctor.image_path) }}"
+                                        alt="{{ doctor.name }}">
                                     {% else %}
-                                        <img class="img-fluid" src="{{ url_for('static', filename='img/default-doctor.jpg') }}" alt="No Image">
+                                    <img class="img-fluid"
+                                        src="{{ url_for('static', filename='img/default-doctor.jpg') }}" alt="No Image">
                                     {% endif %}
                                 </div>
                                 <div class="content">
                                     <h3>{{ doctor.name }}</h3>
                                     <h4>{{ doctor.specialization }}</h4>
                                     {% if doctor.day_from and doctor.day_to and doctor.time_from_hour %}
-                                        <p class="details">
-                                            <b>Timings:</b>
-                                            {{ doctor.day_from }} - {{ doctor.day_to }},
-                                            {{ doctor.time_from_hour }}:{{ doctor.time_from_min }} {{ doctor.time_from_ampm }} -
-                                            {{ doctor.time_to_hour }}:{{ doctor.time_to_min }} {{ doctor.time_to_ampm }}
-                                        </p>
+                                    <p class="details">
+                                        <b>Timings:</b>
+                                        {{ doctor.day_from }} - {{ doctor.day_to }},
+                                        {{ doctor.time_from_hour }}:{{ doctor.time_from_min }} {{ doctor.time_from_ampm
+                                        }} -
+                                        {{ doctor.time_to_hour }}:{{ doctor.time_to_min }} {{ doctor.time_to_ampm }}
+                                    </p>
                                     {% endif %}
-                                    <a class="book-btn" target="_blank" href="{{ doctor.appointment_link or 'https://app.fyndbetter.com/ahh_apt' }}">
+                                    <a class="book-btn" target="_blank"
+                                        href="{{ doctor.appointment_link or 'https://app.fyndbetter.com/ahh_apt' }}">
                                         BOOK APPOINTMENT
                                     </a>
+                                    <a href="{{ url_for('doctor_detail', slug=doctor.slug) }}"
+                                        class="action-btn profile-btn">View
+                                        Profile</a>
+
                                 </div>
                             </div>
                         </div>
-                    {% endif %}
-                {% endfor %}
+                        {% endif %}
+                        {% endfor %}
 
-                {% if not ns.has_doctors %}
-                <div class="col-12">
-                    <div class="alert alert-warning">
-                        No specialists found for this department.
+                        {% if not ns.has_doctors %}
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                No specialists found for this department.
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-            </div>
+            </section>
         </div>
-    </section>
+    </div>
 </div>
-
 
 <script>
     function showDescription(index) {
+        // Get the hidden description
         let desc = document.getElementById("desc-" + index).innerHTML;
+
+        // Place it into the container below the grid
         document.getElementById("description-container").innerHTML = desc;
     }
 </script>
 
+
+
+
 <section data-aos-easing="ease-in-sine" class="service-carousel-section py-5">
     <div class="container d-flex justify-content-center">
         <div class="owl-carousel service-carousel">
-            </div>
+            <a href="/departments/general-surgery" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/general-surgery.svg);"
+                data-department="general-surgery"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/general-surgery.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">General Surgery</h4>
+            </a><a href="/departments/neurosurgery" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/neurosurgery.svg);"
+                data-department="neurosurgery"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/neurosurgery.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Neurosurgery</h4>
+            </a><a href="/departments/orthopaedics" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/orthopaedics.svg);"
+                data-department="orthopaedics"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/orthopaedics.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Orthopaedics</h4>
+            </a><a href="/departments/anaesthesia" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/anaesthesia.svg);"
+                data-department="anaesthesia"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/anaesthesia.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3"> Anaesthesiology & Critical Care</h4>
+            </a><a href="/departments/pain-medicine" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/pain-medicine.svg);"
+                data-department="pain-medicine"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/pain-medicine.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Pain Medicine</h4>
+            </a><a href="/departments/general-medicine" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/general-medicine.svg);"
+                data-department="general-medicine"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/general-medicine.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">General Medicine</h4>
+            </a><a href="/departments/lab-medicine" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/lab-medicine.svg);"
+                data-department="lab-medicine"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/lab-medicine.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Lab Medicine</h4>
+            </a><a href="/departments/paediatrics" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/paediatrics.svg);"
+                data-department="paediatrics"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/paediatrics.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Paediatrics</h4>
+            </a><a href="/departments/physiotherapy" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/physiotherapy.svg);"
+                data-department="physiotherapy"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/physiotherapy.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Physiotherapy</h4>
+            </a><a href="/departments/dermatology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/dermatology.svg);"
+                data-department="dermatology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/dermatology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Dermatology</h4>
+            </a><a href="/departments/ent" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/ent.svg);" data-department="ent"><img
+                    class="dept-icon" loading="lazy" src="/static/img/department/icons/ent.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3"> Ear, Nose, and Throat (ENT)</h4>
+            </a><a href="/departments/emergency-medicine" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/emergency-medicine.svg);"
+                data-department="emergency-medicine"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/emergency-medicine.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Emergency Medicine</h4>
+            </a><a href="/departments/nephrology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/nephrology.svg);"
+                data-department="nephrology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/nephrology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Nephrology</h4>
+            </a><a href="/departments/urology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/urology.svg);"
+                data-department="urology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/urology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Urology</h4>
+            </a><a href="/departments/medical-gastroenterology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/medical-gastroenterology.svg);"
+                data-department="medical-gastroenterology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/medical-gastroenterology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Medical Gastroenterology</h4>
+            </a><a href="/departments/minimal-access-surgery" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/minimal-access-surgery.svg);"
+                data-department="minimal-access-surgery"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/minimal-access-surgery.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Minimal Access Surgery</h4>
+            </a><a href="/departments/plastic-surgery" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/plastic-surgery.svg);"
+                data-department="plastic-surgery"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/plastic-surgery.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Plastic Surgery</h4>
+            </a><a href="/departments/obg" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/obg.svg);" data-department="obg"><img
+                    class="dept-icon" loading="lazy" src="/static/img/department/icons/obg.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Obstetrics & Gynaecology</h4>
+            </a><a href="/departments/surgical-gastroenterology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/surgical-gastroenterology.svg);"
+                data-department="surgical-gastroenterology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/surgical-gastroenterology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Surgical Gastroenterology</h4>
+            </a><a href="/departments/radiology" class="item"
+                style="--i:url(https://aarogyahastha.com/img/department/icons/radiology.svg);"
+                data-department="radiology"><img class="dept-icon" loading="lazy"
+                    src="/static/img/department/icons/radiology.svg">
+                <div class="icon"></div>
+                <h4 class="text-dark-blue my-md-3">Radiology</h4>
+            </a>
+        </div>
     </div>
 </section>
 
+<!-- scripts -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="/static/js/script.js"></script>
-<script src="https://fyndbetter.com/chatbot/aarogya_chatbot"></script>
 <script>
     $(".book-apt").on('click', function () {
         var url = $(this).data("url");
         window.open(url, '_blank');
     });
+    function showChromePopup() {
+        const popup = document.getElementById("chrome-popup");
+        popup.classList.add("is-visible");
+        popup.setAttribute("aria-hidden", "false");
+    }
+    function hideChromePopup() {
+        const popup = document.getElementById("chrome-popup");
+        popup.classList.remove("is-visible");
+        popup.setAttribute("aria-hidden", "true");
+    }
+    // ESC closes popup
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") hideChromePopup();
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const scrollBtn = document.getElementById('scrollToTopBtn');
+        const scrollThreshold = 300;
+
+        function toggleScrollButton() {
+            if (window.pageYOffset > scrollThreshold ||
+                document.documentElement.scrollTop > scrollThreshold) {
+                scrollBtn.style.display = 'flex';
+            } else {
+                scrollBtn.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('scroll', toggleScrollButton);
+
+        scrollBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            // Add slight animation to the icon
+            this.querySelector('i').style.transform = 'translateY(-4px)';
+            setTimeout(() => {
+                this.querySelector('i').style.transform = '';
+            }, 300);
+        });
+
+        // Initialize on load
+        toggleScrollButton();
+    });
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    mobileMenuToggle.addEventListener('click', function () {
+        mobileNav.classList.toggle('active'); // toggles visibility
+    });
+
 </script>
 <a href="#" id="scrollToTopBtn" class="scroll-to-top-btn" title="Scroll to top" aria-label="Scroll to top">
-    <i class="fa fa-arrow-up"></i>
+    <i class="fa fa-arrow-up"></i> <!-- Simple up arrow -->
 </a>
+
 <script> $(document).ready(function () { initDepartmentPageActions(); }) </script>
 {% endblock %}
