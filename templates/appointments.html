@@ -6,7 +6,9 @@
 <style>
     /* Styling for the breadcrumb navigation */
     .breadcrumb-section {
-        padding: 15px 200px;
+        /* ORIGINAL: padding: 15px 200px; */
+        /* MODIFIED: Add a left offset to clear the sidebar (~80px total width/padding) */
+        padding: 15px 200px 15px 80px;
         background-color: #f8f9fa;
         border-bottom: 1px solid #dee2e6;
     }
@@ -39,6 +41,8 @@
     /* Styling for a seamless, full-page iframe experience */
     .appointment-page-section {
         padding: 0;
+        /* MODIFIED: Add a left offset to clear the sidebar */
+        padding-left: 20px;
     }
 
     .appointment-iframe-wrapper {
