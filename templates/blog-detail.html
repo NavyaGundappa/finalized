@@ -2,6 +2,16 @@
 
 {% block title %}{% if blog %}{{ blog.title }} - Aarogya Hastha{% else %}Blog - Aarogya Hastha{% endif %}{% endblock %}
 
+{% block head %}
+{{ super() }}
+
+{% if blog and blog.excerpt %}
+<link rel="canonical" href="https://aarogyahastha.com/blog/{{ blog.slug }}" />
+<meta name="description"
+    content="Discover insightful articles, tutorials, and resources to help you grow your knowledge and stay updated with the latest trends.">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 
 <div class="blog-detail-container">
@@ -19,32 +29,14 @@
             <div class="hero-content">
 
                 <!-- Centered Title at Bottom -->
-                <!-- Centered Title at Bottom -->
                 <div class="hero-blog-info-centered">
                     <h1 class="blog-title">{{ blog.title }}</h1>
                 </div>
 
-                <style>
-                    .blog-title {
-                        white-space: pre-wrap;
-                        /* preserves line breaks and spaces */
-                        text-align: center;
-                        /* center alignment */
-                    }
-                </style>
-
-
             </div>
         </div>
     </section>
-    <style>
-        .blog-title {
-            white-space: pre-wrap;
-            /* Keeps your line breaks and spacing */
-            word-wrap: break-word;
-            /* Breaks long words if needed */
-        }
-    </style>
+
     <div class="desktop-layout">
         <!-- Main Content -->
         <article class="main-content">
@@ -56,7 +48,6 @@
                 </div>
             </section>
             {% endif %}
-
 
             <section class="content-section">
                 <div class="content-wrapper">
@@ -71,8 +62,17 @@
             <section class="mobile-related-section">
                 <div class="mobile-widget-header">
                     <h3 class="mobile-widget-title">Related Articles</h3>
-                    <p class="mobile-widget-subtitle">More from {{ blog.department.name if blog.department else 'Health'
-                        }}</p>
+                    <p class="mobile-widget-subtitle">
+                        {% if has_department_blogs %}
+                        {% if department_blog_count > 1 %}
+                        More from {{ blog.department.name }} & related articles
+                        {% else %}
+                        Related health articles
+                        {% endif %}
+                        {% else %}
+                        Latest Health Articles
+                        {% endif %}
+                    </p>
                 </div>
                 <div class="mobile-related-container">
                     <div class="mobile-related-scroll" id="mobileRelatedScroll">
@@ -90,7 +90,13 @@
                             <div class="mobile-related-content">
                                 <h4 class="mobile-related-title">{{ related_blog.title }}</h4>
                                 <div class="mobile-related-meta">
+                                    {% if related_blog.department %}
+                                    <span class="related-article-department">{{ related_blog.department.name }}</span>
+                                    {% endif %}
+                                    <span class="related-article-date">{{ related_blog.created_at.strftime('%b %d, %Y')
+                                        }}</span>
                                 </div>
+                            </div>
                         </a>
                         {% endfor %}
                     </div>
@@ -105,7 +111,16 @@
             <div class="sidebar-widget">
                 <div class="widget-header">
                     <h3 class="widget-title">Related Articles</h3>
-                    <p class="widget-subtitle">More from {{ blog.department.name if blog.department else 'Health' }}
+                    <p class="widget-subtitle">
+                        {% if has_department_blogs %}
+                        {% if department_blog_count > 1 %}
+                        More from {{ blog.department.name }} & related articles
+                        {% else %}
+                        Related health articles
+                        {% endif %}
+                        {% else %}
+                        Latest Health Articles
+                        {% endif %}
                     </p>
                 </div>
                 <div class="related-articles-container">
@@ -124,6 +139,9 @@
                             <div class="related-article-content">
                                 <h4 class="related-article-title">{{ related_blog.title }}</h4>
                                 <div class="related-article-meta">
+                                    {% if related_blog.department %}
+                                    <span class="related-article-department">{{ related_blog.department.name }}</span>
+                                    {% endif %}
                                     <span class="related-article-date">{{ related_blog.created_at.strftime('%b %d, %Y')
                                         }}</span>
                                 </div>
@@ -222,15 +240,11 @@
     .hero-blog-info-centered {
         position: absolute;
         bottom: 20px;
-        /* slightly lower on image */
         left: 50%;
         transform: translateX(-50%);
         display: inline-block;
-        /* makes container fit content width */
         background: rgba(0, 0, 0, 0.35);
-        /* subtle transparent black */
         padding: 0.6rem 1.2rem;
-        /* balanced padding */
         border-radius: 12px;
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
@@ -248,12 +262,12 @@
     .blog-title {
         font-family: 'Georgia', serif;
         font-size: 1.6rem;
-        /* refined smaller size */
         font-weight: 500;
-        /* light elegant look */
         color: #fff;
         text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
         margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
 
     /* Desktop Layout - Optimized spacing */
@@ -282,12 +296,10 @@
         background: var(--color-white);
         border: 1px solid var(--color-border);
         padding: 0.75rem 1rem;
-        /* reduced padding */
         border-radius: 8px;
         display: flex;
         align-items: flex-start;
         gap: 0.5rem;
-        /* reduced gap between icon and text */
         max-width: 100%;
         width: 100%;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -337,7 +349,7 @@
         font-family: 'Georgia', serif;
     }
 
-    /* Preserve Quill image styles - THIS IS THE KEY FIX */
+    /* Preserve Quill image styles */
     .blog-body img {
         max-width: 100% !important;
         height: auto !important;
@@ -507,6 +519,20 @@
         font-size: 0.9em;
     }
 
+    /* Department tag styles */
+    .related-article-department {
+        background: var(--color-primary);
+        color: var(--color-white);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .mobile-related-meta .related-article-department {
+        margin-right: 8px;
+    }
+
     /* Mobile Related Articles Section */
     .mobile-related-section {
         margin-top: var(--space-xl);
@@ -611,11 +637,12 @@
         gap: var(--space-md);
         font-size: 0.85rem;
         color: var(--color-text);
+        align-items: center;
     }
 
     /* Auto-scroll animation for mobile - Slower and Smoother */
     .auto-scroll-mobile {
-        animation: autoScrollMobile 25s linear infinite;
+        animation: autoScrollMobile 2s linear infinite;
     }
 
     .auto-scroll-mobile:hover {
@@ -782,6 +809,7 @@
         .related-article-meta {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-size: 0.75rem;
             color: var(--color-text);
             margin-top: auto;

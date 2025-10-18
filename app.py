@@ -32,6 +32,11 @@ app.secret_key = 'your_secret_key'
 app.config.from_object(Config)
 db.init_app(app)
 
+GENERATED_BLOG_FOLDER = os.path.join(app.root_path, 'templates', 'blog_pages')
+
+if not os.path.exists(GENERATED_BLOG_FOLDER):
+    os.makedirs(GENERATED_BLOG_FOLDER)
+
 
 def create_upload_dirs():
     directories = ['banners', 'doctors', 'testimonials', 'icons']
@@ -3438,41 +3443,168 @@ def api_blogs():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/blog/<slug>')
+# ----------------- BLOG HTML GENERATION FUNCTION -----------------
+
+
+def remove_blog_html(slug):
+    """Deletes the static HTML file for a blog post."""
+    file_path = os.path.join(GENERATED_BLOG_FOLDER, f'{slug}.html')
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
+@app.route('/blog/<slug>/')
 def blog_detail(slug):
-    try:
-        print(f"Looking for blog with slug: {slug}")  # Debug
-        blog = Blog.query.filter_by(slug=slug, is_active=True).first()
+    """
+    Serves the pre-generated static HTML file for the blog post URL.
+    Falls back to dynamic rendering and regenerates the file if it's missing.
+    """
+    # 1. Check for the pre-generated static HTML file
+    filename = f'{slug}.html'
+    static_file_path = os.path.join(GENERATED_BLOG_FOLDER, filename)
 
-        if not blog:
-            print("Blog not found")  # Debug
-            flash("Blog not found", "error")
-            return redirect(url_for('blog'))
+    if os.path.exists(static_file_path):
+        # Serve the pre-generated file directly
+        return send_from_directory(GENERATED_BLOG_FOLDER, filename)
 
-        print(f"Found blog: {blog.title}")  # Debug
-        print(f"Blog department: {blog.department}")  # Debug
+    # 2. Fallback: If the static file is missing, fetch the data dynamically.
+    blog = Blog.query.filter_by(slug=slug, is_active=True).first_or_404()
 
-        # Get related blogs from same department
-        related_blogs = []
-        if blog.department_id:
+    # Enhanced related blogs logic with mixed content
+    related_blogs = []
+    has_department_blogs = False
+    department_blog_count = 0
+
+    if blog.department_id:
+        # Get other blogs from the same department (excluding current blog)
+        department_blogs = Blog.query.filter(
+            Blog.department_id == blog.department_id,
+            Blog.id != blog.id,
+            Blog.is_active == True
+        ).order_by(Blog.created_at.desc()).limit(6).all()
+
+        department_blog_count = len(department_blogs)
+
+        if department_blog_count > 0:
+            # If there are department blogs, use them as base
+            related_blogs = department_blogs
+            has_department_blogs = True
+
+            # If we have less than 6 department blogs, supplement with general blogs
+            if department_blog_count < 6:
+                remaining_slots = 6 - department_blog_count
+
+                # Get general blogs (blogs from other departments OR no department)
+                general_blogs = Blog.query.filter(
+                    Blog.id != blog.id,
+                    Blog.is_active == True
+                ).filter(
+                    (Blog.department_id != blog.department_id) | (
+                        Blog.department_id.is_(None))
+                ).order_by(Blog.created_at.desc()).limit(remaining_slots).all()
+
+                related_blogs.extend(general_blogs)
+                print(
+                    f"Debug: Showing {department_blog_count} department blogs + {len(general_blogs)} general blogs")
+            else:
+                print(
+                    f"Debug: Showing {department_blog_count} department blogs")
+        else:
+            # If no department blogs, fall back to general blogs
             related_blogs = Blog.query.filter(
-                Blog.department_id == blog.department_id,
                 Blog.id != blog.id,
                 Blog.is_active == True
-            ).order_by(Blog.created_at.desc()).limit(3).all()
+            ).order_by(Blog.created_at.desc()).limit(6).all()
+            print(
+                f"Debug: Showing {len(related_blogs)} general blogs (no department blogs available)")
+    else:
+        # If no department, show general blogs
+        related_blogs = Blog.query.filter(
+            Blog.id != blog.id,
+            Blog.is_active == True
+        ).order_by(Blog.created_at.desc()).limit(6).all()
+        print(
+            f"Debug: Showing {len(related_blogs)} general blogs (no department assigned)")
 
-        print(f"Found {len(related_blogs)} related blogs")  # Debug
+    # 3. Regenerate the static file to be ready for the next request
+    generate_blog_html(blog)
 
-        # Make sure we're passing the blog variable
-        return render_template('blog-detail.html', blog=blog, related_blogs=related_blogs)
+    return render_template('blog-detail.html',
+                           blog=blog,
+                           related_blogs=related_blogs,
+                           has_department_blogs=has_department_blogs,
+                           department_blog_count=department_blog_count)
 
-    except Exception as e:
-        print(f"Error in blog_detail: {str(e)}")
-        traceback.print_exc()
-        flash("Error loading blog", "error")
-        return redirect(url_for('blog'))
 
-# Admin Blog Management
+def generate_blog_html(blog):
+    """
+    Generates the final static HTML file for a single blog post based on its slug.
+    """
+    if not blog or not blog.slug:
+        return
+
+    # Enhanced related blogs logic (same as above)
+    related_blogs = []
+    has_department_blogs = False
+    department_blog_count = 0
+
+    if blog.department_id:
+        department_blogs = Blog.query.filter(
+            Blog.department_id == blog.department_id,
+            Blog.id != blog.id,
+            Blog.is_active == True
+        ).order_by(Blog.created_at.desc()).limit(6).all()
+
+        department_blog_count = len(department_blogs)
+
+        if department_blog_count > 0:
+            related_blogs = department_blogs
+            has_department_blogs = True
+
+            if department_blog_count < 6:
+                remaining_slots = 6 - department_blog_count
+
+                # Get general blogs (blogs from other departments OR no department)
+                general_blogs = Blog.query.filter(
+                    Blog.id != blog.id,
+                    Blog.is_active == True
+                ).filter(
+                    (Blog.department_id != blog.department_id) | (
+                        Blog.department_id.is_(None))
+                ).order_by(Blog.created_at.desc()).limit(remaining_slots).all()
+
+                related_blogs.extend(general_blogs)
+        else:
+            related_blogs = Blog.query.filter(
+                Blog.id != blog.id,
+                Blog.is_active == True
+            ).order_by(Blog.created_at.desc()).limit(6).all()
+    else:
+        related_blogs = Blog.query.filter(
+            Blog.id != blog.id,
+            Blog.is_active == True
+        ).order_by(Blog.created_at.desc()).limit(6).all()
+
+    # Use the application context for rendering templates outside of a request
+    with app.app_context():
+        # Render the 'blog-detail.html' template
+        rendered_html = render_template(
+            'blog-detail.html',
+            blog=blog,
+            related_blogs=related_blogs,
+            has_department_blogs=has_department_blogs,
+            department_blog_count=department_blog_count
+        )
+
+        # Define the file path: static/blog_pages/my-blog-slug.html
+        file_path = os.path.join(GENERATED_BLOG_FOLDER, f'{blog.slug}.html')
+
+        try:
+            # Write the rendered content to the static file
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(rendered_html)
+        except Exception as e:
+            print(f"Error writing blog HTML: {e}")
 
 
 @app.route('/admin/blogs', methods=['GET', 'POST'])
@@ -3561,6 +3693,7 @@ def admin_blogs():
             )
             db.session.add(blog)
             db.session.commit()
+            generate_blog_html(blog)
             flash("Blog added successfully!", "success")
 
         return redirect(url_for('admin_blogs'))
@@ -3581,6 +3714,26 @@ def admin_blogs():
     return render_template('admin/blogs.html', blogs=blogs, departments=departments, access=access, current_user=user)
 
 # API endpoint for fetching blog data for editing
+# In app.py, within your delete_blog route:
+
+
+@app.route('/admin/delete_blog/<int:blog_id>', methods=['POST'])
+# ... decorators ...
+def delete_blog(blog_id):
+    blog = Blog.query.get_or_404(blog_id)
+    slug = blog.slug
+
+    # Delete the blog from the database
+    db.session.delete(blog)
+    db.session.commit()
+
+    # Delete the corresponding static file
+    file_path = os.path.join(GENERATED_BLOG_FOLDER, f'{slug}.html')
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    flash('Blog deleted successfully!', 'success')
+    return redirect(url_for('admin_blogs'))
 
 
 @app.route('/api/blog/<int:blog_id>')
