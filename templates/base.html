@@ -861,6 +861,19 @@
         .chrome-btn--grey:hover {
             background: #dadce0;
         }
+
+        .header-logos {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Adjust spacing between the logos */
+        }
+
+        .new-logo-wrapper .new-logo-img {
+            height: 60px;
+            /* Example size, adjust as needed */
+            width: auto;
+        }
     </style>
 </head>
 
@@ -897,8 +910,14 @@
         <div class="header-top-container">
             <div class="container header-top-content">
                 <a href="/" class="logo">
-                    <div class="logo-wrapper">
-                        <img src="static/img/logo.png" alt="Logo" class="header-logo-img">
+                    <div class="header-logos">
+                        <div class="logo-wrapper">
+                            <img src="static/img/logo.png" alt="AarogyaHastha Hospitals Logo" class="header-logo-img">
+                        </div>
+                        <div class="logo-wrapper new-logo-wrapper">
+                            <img src="static/img/NABH_Logo-01.png" alt="New Hospital Logo"
+                                class="header-logo-img new-logo-img">
+                        </div>
                     </div>
                 </a>
                 <button class="navbar-toggle d-lg-none" id="mobile-menu-toggle">
